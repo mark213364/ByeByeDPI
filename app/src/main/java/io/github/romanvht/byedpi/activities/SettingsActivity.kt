@@ -13,6 +13,7 @@ import io.github.romanvht.byedpi.data.AppSettings
 import io.github.romanvht.byedpi.fragments.ByeDpiCMDSettingsFragment
 import io.github.romanvht.byedpi.fragments.ByeDpiUISettingsFragment
 import io.github.romanvht.byedpi.fragments.MainSettingsFragment
+import io.github.romanvht.byedpi.ui.mods.ModsFragment
 import io.github.romanvht.byedpi.utility.SettingsUtils
 import io.github.romanvht.byedpi.utility.SettingsUtils.Section
 import java.io.File
@@ -35,26 +36,7 @@ class SettingsActivity : BaseActivity() {
         if (savedInstanceState == null) {
             val openFragment = intent.getStringExtra("open_fragment")
 
-            when (openFragment) {
-                "cmd" -> {
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.settings, ByeDpiCMDSettingsFragment())
-                        .commit()
-                }
-                "ui" -> {
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.settings, ByeDpiUISettingsFragment())
-                        .commit()
-                }
-                else -> {
-                    supportFragmentManager
-                        .beginTransaction()
-                        .replace(R.id.settings, MainSettingsFragment())
-                        .commit()
-                }
-            }
+            
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
