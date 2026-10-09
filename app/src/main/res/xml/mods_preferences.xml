@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:title="Моды">
+
+    <!--
+        Этот экран заполняется динамически из кода (ModsFragment.kt).
+        Здесь задаётся только структура и заголовок.
+        Каждый мод добавляется как SwitchPreferenceCompat в onCreatePreferences().
+    -->
+
+    <PreferenceCategory
+        app:title="Доступные моды">
+
+        <!--
+            Пример статического мода (если не хочешь делать всё динамически).
+            Раскомментируй и замени, если хочешь добавить мод вручную.
+        -->
+        <!--
+        <SwitchPreferenceCompat
+            app:key="auto_strategy"
+            app:title="Автоподбор стратегий"
+            app:summary="Автоматически тестирует стратегии и выбирает лучшую"
+            app:defaultValue="false" />
+        -->
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:title="Информация">
+
+        <Preference
+            app:key="mods_info"
+            app:title="О модах"
+            app:summary="Моды добавляют дополнительные функции. Включай только те, которые тебе нужны." />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
