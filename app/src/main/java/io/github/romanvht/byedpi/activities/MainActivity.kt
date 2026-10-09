@@ -27,6 +27,7 @@ import androidx.lifecycle.lifecycleScope
 import io.github.romanvht.byedpi.R
 import io.github.romanvht.byedpi.data.*
 import io.github.romanvht.byedpi.databinding.ActivityMainBinding
+import io.github.romanvht.byedpi.mods.ModManager
 import io.github.romanvht.byedpi.services.ServiceManager
 import io.github.romanvht.byedpi.services.TestService
 import io.github.romanvht.byedpi.services.appStatus
@@ -151,6 +152,9 @@ class MainActivity : BaseActivity() {
         setupToolbar()
 
         historyUtils = HistoryUtils(this)
+
+        // Инициализация менеджера модов
+        ModManager.init(this)
 
         val intentFilter = IntentFilter().apply {
             addAction(STARTED_BROADCAST)
