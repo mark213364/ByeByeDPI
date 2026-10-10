@@ -1,20 +1,16 @@
 <resources>
     <style name="Theme.ByeDPI" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">#5976DF</item>
-        <item name="colorPrimaryVariant">#3C52A3</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimary">@color/toolbar_bg</item>
+        <item name="colorPrimaryVariant">@color/toolbar_bg</item>
+        <item name="colorOnPrimary">@color/toolbar_text</item>
 
         <item name="colorSecondary">#5976DF</item>
         <item name="colorSecondaryVariant">#3C52A3</item>
         <item name="colorOnSecondary">#FFFFFF</item>
 
-        <item name="android:statusBarColor">#3C52A3</item>
-
-        <!-- Убраны colorSurface и colorOnSurface — DayNight сам подставит -->
+        <item name="android:statusBarColor">@color/toolbar_bg</item>
 
         <item name="materialCardViewStyle">@style/SmallShadowCard</item>
-
-        <!-- Нужно для PreferenceFragmentCompat -->
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
