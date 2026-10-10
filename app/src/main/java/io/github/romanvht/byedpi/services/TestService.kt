@@ -186,7 +186,12 @@ class TestService : Service() {
                     Toast.makeText(this@TestService, R.string.test_settings_domain_empty, Toast.LENGTH_LONG).show()
                     return@launch
                 }
-                strategies.addAll(options.commands.map { StrategyResult(command = it) })
+                strategies.addAll(options.commands.map { raw ->
+                val parts = raw.split("|", limit = 2)
+                val name = if (parts.size == 2) parts[0].trim() else ""
+                val command = if (parts.size == 2) parts[1].trim() else raw
+                StrategyResult(command = command, name = name)
+         })
                 prepared = true
                 getPreferences().edit(commit = true) { putBoolean("is_test_running", true) }
                 publish(strategies, 0)
