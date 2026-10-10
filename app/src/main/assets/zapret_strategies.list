@@ -1,0 +1,35 @@
+General | --proto=tls --fake -1 --split 2 --disorder 5
+ALT 1 | --proto=tls --fake -1 --split 1 --disorder 3+s --ttl 8
+ALT 2 | --proto=tls --fake -1 --split 1+s --oob --ttl 8
+ALT 3 | --proto=tls --fake -1 --split 5 --disorder 7
+ALT 4 | --proto=tls --split 1+s --disorder 3+s --auto=none
+ALT 5 | --proto=tls --fake -2 --split 1 --ttl 8
+ALT 6 | --proto=tls --split 1 --disorder 3+s --oob --ttl 8
+ALT 7 | --proto=tls --fake -1 --split 1:3 --ttl 8
+ALT 8 | --proto=tls --split 5+s --disorder 7+s --auto=none
+ALT 9 | --proto=tls --fake -1 --split 1 --ttl 1 --oob
+ALT 10 | --proto=tls --fake -1 --ttl 5 --split 1 --auto=none
+Fake TLS AUTO | --proto=tls --fake -1 --split 1+s --disorder 3+s --ttl 8
+Fake TLS 1 | --proto=tls --fake -1 --split 2+s --disorder 5+s
+Fake TLS 2 | --proto=tls --fake -1 --split 1:5 --ttl 8
+Fake TLS 3 | --proto=tls --fake -1 --split 1 --ttl 5 --oob
+Multisplit 1 | --proto=tls --split 1+s --disorder 3+s
+Multisplit 2 | --proto=tls --split 2+s --disorder 5+s
+Multisplit 3 | --proto=tls --split 1:5 --ttl 8
+Multisplit 4 | --proto=tls --split 5+s --disorder 7+s
+Disorder 1 | --proto=tls --disorder 3+s --split 1
+Disorder 2 | --proto=tls --disorder 5+s --split 1+s
+Disorder 3 | --proto=tls --disorder 7+s --split 2+s
+OOB 1 | --proto=tls --oob --split 1+s --ttl 8
+OOB 2 | --proto=tls --oob --disorder 3+s --split 1
+OOB 3 | --proto=tls --oob --split 1 --disorder 3+s --ttl 8
+Fake 1 | --proto=tls --fake -1 --ttl 8 --split 1
+Fake 2 | --proto=tls --fake -1 --ttl 5 --split 1+s
+Fake 3 | --proto=tls --fake -2 --ttl 8 --split 1 --disorder 3+s
+TTL 1 | --proto=tls --fake -1 --ttl 1 --split 1
+TTL 2 | --proto=tls --fake -1 --ttl 3 --split 1+s
+TTL 3 | --proto=tls --fake -1 --ttl 5 --split 1 --oob
+TTL 4 | --proto=tls --fake -1 --ttl 8 --split 1 --disorder 3+s
+Split 1 | --proto=tls --split 1 --disorder 3+s
+Split 2 | --proto=tls --split 2 --disorder 5+s
+Split 3 | --proto=tls --split 5+s --disorder 7+s
