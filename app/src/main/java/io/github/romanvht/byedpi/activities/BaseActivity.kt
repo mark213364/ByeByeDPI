@@ -32,5 +32,4 @@ abstract class BaseActivity : AppCompatActivity() {
         val toolbar: MaterialToolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
     }
-
 }
