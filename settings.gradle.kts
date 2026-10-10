@@ -15,3 +15,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ByeDpi"
 include(":app")
+include(":plugin-api")
