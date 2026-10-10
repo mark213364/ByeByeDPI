@@ -338,7 +338,7 @@ class TestService : Service() {
         val userCommands = prefs.getBoolean("byedpi_proxytest_usercommands", false)
         val sniValue = prefs.getStringNotNull("byedpi_proxytest_sni", "google.com")
         val content = if (userCommands) prefs.getStringNotNull("byedpi_proxytest_commands", "")
-        else assets.open("proxytest_strategies.list").bufferedReader().use { it.readText() }
+        else assets.open("zapret_strategies.list").bufferedReader().use { it.readText() }
         val commands = content.replace("{sni}", "\"${sniValue}\"").lines().map { it.trim() }.filter { it.isNotEmpty() }
         val host = prefs.getStringNotNull("byedpi_proxy_ip", "127.0.0.1")
         val port = prefs.getIntStringNotNull("byedpi_proxy_port", 1080)
