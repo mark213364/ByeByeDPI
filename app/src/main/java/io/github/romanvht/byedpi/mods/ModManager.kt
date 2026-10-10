@@ -19,7 +19,7 @@ object ModManager {
     fun init(context: Context) {
         if (initialized) return
         prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-        registerBuiltinMods()
+        registerBuiltinMods(context)
 
         mods.forEach { mod ->
             if (isEnabled(mod.id)) {
@@ -33,9 +33,25 @@ object ModManager {
         initialized = true
     }
 
-    private fun registerBuiltinMods() {
+    /**
+     * Перезагружает список модов — например, после установки нового .dex.
+     */
+    fun reload(context: Context) {
+        // Останавливаем все запущенные моды
+        runningJobs.values.forEach { it.cancel() }
+        runningJobs.clear()
+        mods.clear()
+        initialized = false
+        init(context)
+    }
+
+    private fun registerBuiltinMods(context: Context) {
         mods.clear()
         mods.add(AutoStrategyMod())
+
+        // Подгружаем .dex-плагины
+        val dexMods = PluginLoader.loadAll(context)
+        mods.addAll(dexMods)
     }
 
     fun getAllMods(): List<Mod> = mods
