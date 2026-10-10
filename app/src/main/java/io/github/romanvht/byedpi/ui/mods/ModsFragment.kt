@@ -13,6 +13,14 @@ class ModsFragment : PreferenceFragmentCompat() {
     private var fab: FloatingActionButton? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        buildPreferenceScreen()
+    }
+
+    /**
+     * Пересобирает список модов из ModManager.
+     * Вызывается при создании и при возвращении на экран.
+     */
+    private fun buildPreferenceScreen() {
         val context = requireContext()
         ModManager.init(context)
 
@@ -51,6 +59,12 @@ class ModsFragment : PreferenceFragmentCompat() {
                     .commit()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Пересобираем список — на случай, если после установки мода он изменился
+        buildPreferenceScreen()
     }
 
     override fun onDestroyView() {
