@@ -1,4 +1,4 @@
-package io.github.romanvht.byedpi.ui.mods
+package io.github.romanvht.byedpi.mods
 
 import android.os.Bundle
 import android.view.View
