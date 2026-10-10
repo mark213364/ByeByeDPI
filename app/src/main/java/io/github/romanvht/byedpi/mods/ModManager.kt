@@ -48,9 +48,8 @@ object ModManager {
     private fun registerBuiltinMods(context: Context) {
         mods.clear()
         mods.add(AutoStrategyMod())
-
-        // Подгружаем .dex-плагины
-        val dexMods = PluginLoader.loadAll(context)
+        mods.add(SmartAutoStrategyMod())  // ← НОВЫЙ МОД
+    val dexMods = PluginLoader.loadAll(context)
         mods.addAll(dexMods)
     }
 
