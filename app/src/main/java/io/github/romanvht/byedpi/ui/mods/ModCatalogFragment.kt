@@ -91,12 +91,16 @@ class ModCatalogFragment : PreferenceFragmentCompat() {
                 }
 
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(
-                        context,
-                        "Мод ${mod.name} установлен. Перезапустите приложение, чтобы он появился в списке.",
-                        Toast.LENGTH_LONG
-                    ).show()
-                    Log.i(TAG, "Мод установлен: ${targetFile.absolutePath}")
+    Toast.makeText(
+        context,
+        "Мод ${mod.name} установлен",
+        Toast.LENGTH_LONG
+    ).show()
+
+    // Перезагружаем список модов
+    io.github.romanvht.byedpi.mods.ModManager.reload(context)
+
+    Log.i(TAG, "Мод установлен: ${targetFile.absolutePath}")
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Ошибка установки мода: ${e.message}", e)
