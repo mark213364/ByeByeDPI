@@ -140,11 +140,17 @@
             android:inputType="number"
             android:defaultValue="1080"
             app:useSimpleSummaryProvider="true" />
-        
+
+    </androidx.preference.PreferenceCategory>
+
+    <androidx.preference.PreferenceCategory
+        android:title="Моды">
+
         <Preference
-            app:title="Моды"
-            app:summary="Дополнительные функции приложения"
-            app:fragment="io.github.romanvht.byedpi.ui.mods.ModsFragment" />
+            android:key="mods"
+            android:icon="@drawable/ic_tune"
+            android:title="Моды"
+            android:summary="Дополнительные функции приложения" />
 
     </androidx.preference.PreferenceCategory>
 
