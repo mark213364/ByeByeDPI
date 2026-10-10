@@ -34,9 +34,34 @@ class SettingsActivity : BaseActivity() {
         setupToolbar()
 
         if (savedInstanceState == null) {
-            val openFragment = intent.getStringExtra("open_fragment")
+    val openFragment = intent.getStringExtra("open_fragment")
 
-            
+    when (openFragment) {
+        "cmd" -> {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings, ByeDpiCMDSettingsFragment())
+                .commit()
+        }
+        "ui" -> {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings, ByeDpiUISettingsFragment())
+                .commit()
+        }
+        "mods" -> {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings, ModsFragment())
+                .commit()
+        }
+        else -> {
+            supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.settings, MainSettingsFragment())
+                .commit()
+        }
+    }
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
