@@ -10,12 +10,11 @@
 
         <item name="android:statusBarColor">#3C52A3</item>
 
-        <item name="colorSurface">#F5F5F5</item>
-        <item name="colorOnSurface">#212121</item>
+        <!-- Убраны colorSurface и colorOnSurface — DayNight сам подставит -->
 
         <item name="materialCardViewStyle">@style/SmallShadowCard</item>
 
-        <!-- ВОТ ЭТА СТРОКА НУЖНА ДЛЯ PreferenceFragmentCompat -->
+        <!-- Нужно для PreferenceFragmentCompat -->
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
