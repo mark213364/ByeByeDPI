@@ -1,0 +1,13 @@
+{
+  "mods": [
+    {
+      "id": "sample_plugin",
+      "name": "Пример плагина",
+      "description": "Демонстрирует работу системы плагинов. Возвращает базовый набор стратегий.",
+      "version": "1.0.0",
+      "author": "mark213364",
+      "file": "sample-plugin.dex",
+      "size": 0
+    }
+  ]
+}
