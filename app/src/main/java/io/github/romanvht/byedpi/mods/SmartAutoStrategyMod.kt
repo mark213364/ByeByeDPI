@@ -2,6 +2,7 @@ package io.github.romanvht.byedpi.mods
 
 import android.content.Context
 import android.util.Log
+import androidx.core.content.edit
 import io.github.romanvht.byedpi.data.StrategyResult
 import io.github.romanvht.byedpi.services.TestService
 import io.github.romanvht.byedpi.utility.getPreferences
@@ -9,34 +10,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import androidx.core.content.edit
-import java.io.File
 
-/**
- * Мод с генетическим алгоритмом подбора стратегий.
- *
- * Работает так:
- * 1. Запускает TestService на базовом наборе стратегий.
- * 2. Берёт топ-5 по successPercentage.
- * 3. Скрещивает и мутирует — получает новое поколение.
- * 4. Тестирует новое поколение.
- * 5. Повторяет 3–5 поколений.
- * 6. Применяет лучшую стратегию.
- */
 class SmartAutoStrategyMod : Mod {
 
     override val id = "smart_auto_strategy"
     override val name = "Умный автоподбор"
-    override val description = "Генетический алгоритм: комбинирует и мутирует лучшие стратегии"
+    override val description = "Комбинирует флаги лучших стратегий и перебирает варианты без дубликатов"
     override val iconResId = android.R.drawable.ic_menu_manage
 
     private var isRunning = false
 
     companion object {
         private const val TAG = "SmartAutoStrategyMod"
-        private const val GENERATIONS = 3
+        private const val GENERATIONS = 4
         private const val TOP_PARENTS = 5
-        private const val POPULATION_SIZE = 10
+        private const val COMBINATIONS_PER_GEN = 20
+        private const val BASE_LIMIT = 40
     }
 
     override suspend fun onEnable(context: Context) {
@@ -51,20 +40,20 @@ class SmartAutoStrategyMod : Mod {
 
     override suspend fun run(context: Context) {
         isRunning = true
-
-        // Ждём, чтобы не мешать пользователю при запуске приложения
         delay(30_000)
 
         while (isRunning) {
             try {
-                Log.i(TAG, "=== Новый цикл умного автоподбора ===")
+                Log.i(TAG, "=== Новый цикл ===")
 
                 var bestStrategy: String? = null
                 var bestSuccess = 0
 
-                // === Поколение 0: базовые стратегии ===
-                var currentPool = loadBaseStrategies(context)
-                Log.i(TAG, "Базовых стратегий: ${currentPool.size}")
+                val allBase = loadBaseStrategies(context)
+                Log.i(TAG, "Загружено базовых: ${allBase.size}")
+
+                var currentPool = StrategyMutator.deduplicate(allBase).take(BASE_LIMIT)
+                Log.i(TAG, "Базовый пул: ${currentPool.size}")
 
                 for (generation in 0 until GENERATIONS) {
                     if (!isRunning) break
@@ -72,13 +61,11 @@ class SmartAutoStrategyMod : Mod {
                     Log.i(TAG, "--- Поколение $generation (стратегий: ${currentPool.size}) ---")
 
                     val results = runTestAndGetResults(context, currentPool)
-
                     if (results.isEmpty()) {
-                        Log.w(TAG, "Нет результатов теста, прерываю")
+                        Log.w(TAG, "Нет результатов")
                         break
                     }
 
-                    // Сортируем по successPercentage
                     val sorted = results
                         .filter { it.totalRequests > 0 }
                         .sortedByDescending { it.successPercentage }
@@ -86,38 +73,54 @@ class SmartAutoStrategyMod : Mod {
                     if (sorted.isEmpty()) break
 
                     val top = sorted.first()
-                    Log.i(TAG, "Лучшая в поколении $generation: ${top.command} (${top.successPercentage}%)")
+                    Log.i(TAG, "Лучшая в поколении: ${top.command} (${top.successPercentage}%)")
 
                     if (top.successPercentage > bestSuccess) {
                         bestSuccess = top.successPercentage
                         bestStrategy = top.command
                     }
 
-                    // Если 100% — дальше искать не нужно
                     if (bestSuccess >= 100) {
-                        Log.i(TAG, "Достигнуто 100%, останавливаюсь")
+                        Log.i(TAG, "Достигнуто 100%, стоп")
                         break
                     }
 
-                    // Берём топ-5 как родителей
                     val parents = sorted.take(TOP_PARENTS).map { it.command }
                     if (parents.isEmpty()) break
 
-                    // Создаём следующее поколение
-                    currentPool = StrategyMutator.buildNextGeneration(parents, POPULATION_SIZE)
-                    Log.i(TAG, "Создано новое поколение: ${currentPool.size} стратегий")
+                    val parsedParents = parents.map { StrategyMutator.parse(it) }
+                    val valuePool = StrategyMutator.collectValues(allBase)
+                    Log.i(TAG, "Групп: ${valuePool.size}, значений: ${valuePool.values.sumOf { it.size }}")
+
+                    val newPool = mutableListOf<String>()
+
+                    val combos = StrategyMutator.buildCombinations(
+                        valuePool = valuePool,
+                        maxCombinations = COMBINATIONS_PER_GEN / 2,
+                        preferGroups = parsedParents.flatMap { it.groups.keys }.distinct()
+                    )
+                    newPool.addAll(combos)
+
+                    while (newPool.size < COMBINATIONS_PER_GEN && parsedParents.size >= 2) {
+                        val a = parsedParents.random()
+                        val b = parsedParents.random()
+                        val child = StrategyMutator.crossover(a, b)
+                        newPool.add(child.toCommand())
+                    }
+
+                    currentPool = StrategyMutator.deduplicate(newPool)
+                    Log.i(TAG, "Новое поколение: ${currentPool.size} (после дедупликации)")
                 }
 
-                // === Применяем лучшую ===
                 if (bestStrategy != null && bestSuccess > 0) {
-                    Log.i(TAG, "Применяю лучшую: $bestStrategy ($bestSuccess%)")
+                    Log.i(TAG, "Применяю: $bestStrategy ($bestSuccess%)")
                     withContext(Dispatchers.Main) {
                         context.getPreferences().edit {
                             putString("byedpi_cmd_args", bestStrategy)
                         }
                     }
                 } else {
-                    Log.w(TAG, "Не удалось найти рабочую стратегию")
+                    Log.w(TAG, "Рабочих стратегий не найдено")
                 }
 
                 Log.i(TAG, "=== Цикл завершён, жду 3 часа ===")
@@ -133,20 +136,15 @@ class SmartAutoStrategyMod : Mod {
         }
     }
 
-    /**
-     * Запускает TestService с заданным списком стратегий и возвращает результаты.
-     */
     private suspend fun runTestAndGetResults(
         context: Context,
         strategies: List<String>
     ): List<StrategyResult> {
-        // Записываем стратегии во временные настройки TestService
         context.getPreferences().edit {
             putBoolean("byedpi_proxytest_usercommands", true)
             putString("byedpi_proxytest_commands", strategies.joinToString("\n"))
         }
 
-        // Запускаем тест
         TestService.loadResults(context)
         delay(500)
 
@@ -155,18 +153,13 @@ class SmartAutoStrategyMod : Mod {
             Log.i(TAG, "TestService запущен")
         }
 
-        // Ждём завершения (до 15 минут)
-        withTimeoutOrNull(15 * 60 * 1000) {
+        withTimeoutOrNull(20 * 60 * 1000) {
             TestService.awaitStopped()
         }
 
-        val state = TestService.state.value
-        return state.strategies
+        return TestService.state.value.strategies
     }
 
-    /**
-     * Загружает базовые стратегии из assets/proxytest_strategies.list.
-     */
     private fun loadBaseStrategies(context: Context): List<String> {
         return try {
             context.assets.open("proxytest_strategies.list")
@@ -176,7 +169,7 @@ class SmartAutoStrategyMod : Mod {
                 .map { it.trim() }
                 .filter { it.isNotEmpty() }
         } catch (e: Exception) {
-            Log.e(TAG, "Не удалось загрузить базовые стратегии: ${e.message}", e)
+            Log.e(TAG, "Не удалось загрузить: ${e.message}", e)
             emptyList()
         }
     }
