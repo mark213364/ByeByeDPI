@@ -1,4 +1,4 @@
-package com.example.byebyedpi.mods
+package io.github.romanvht.byedpi.mods
 
 import android.content.Context
 
