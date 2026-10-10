@@ -1,5 +1,6 @@
 package io.github.romanvht.byedpi.mods
 
+import io.github.romanvht.byedpi.mods.Mod
 import android.content.Context
 
 class AutoStrategyMod : Mod {
