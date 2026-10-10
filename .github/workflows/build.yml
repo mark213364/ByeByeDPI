@@ -29,10 +29,30 @@ jobs:
     - name: Build debug APK
       run: ./gradlew assembleDebug
 
+    - name: Build sample plugin AAR
+      run: ./gradlew :sample-plugin:assembleRelease
+
+    - name: Convert plugin to DEX
+      run: |
+        mkdir -p plugin-dex
+        find sample-plugin/build/outputs/aar -name "*.aar" -exec unzip -o {} -d plugin-dex/aar-extract \;
+        D8=$(find $ANDROID_HOME/build-tools -name d8 | sort -r | head -n 1)
+        echo "Using d8: $D8"
+        $D8 --output plugin-dex --lib $ANDROID_HOME/platforms/android-34/android.jar plugin-dex/aar-extract/classes.jar
+        ls -la plugin-dex
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: app-debug
         path: app/build/outputs/apk/**/*.apk
+        if-no-files-found: error
+
+    - name: Upload plugin DEX
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: sample-plugin-dex
+        path: plugin-dex/classes.dex
         if-no-files-found: error
