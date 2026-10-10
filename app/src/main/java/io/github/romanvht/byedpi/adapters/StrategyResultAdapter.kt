@@ -63,7 +63,7 @@ class StrategyResultAdapter(
     override fun onBindViewHolder(holder: StrategyViewHolder, position: Int) {
         val strategy = strategies[position]
 
-        holder.commandTextView.text = strategy.command
+        holder.commandTextView.text = if (strategy.name.isNotBlank()) strategy.name else strategy.command
 
         if (strategy.totalRequests > 0) {
             holder.progressLayout.visibility = View.VISIBLE
