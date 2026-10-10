@@ -2,6 +2,7 @@ package io.github.romanvht.byedpi.ui.mods
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.Preference
@@ -29,9 +30,14 @@ class ModCatalogFragment : PreferenceFragmentCompat() {
         }
         screen.addPreference(loading)
         preferenceScreen = screen
+    }
 
-        // Загружаем список модов в фоне
-        viewLifecycleOwner.lifecycleScope.launch {
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val context = requireContext()
+
+        lifecycleScope.launch {
             val mods = ModRepository.fetchMods()
             withContext(Dispatchers.Main) {
                 if (!isAdded) return@withContext
@@ -68,7 +74,7 @@ class ModCatalogFragment : PreferenceFragmentCompat() {
 
         Toast.makeText(context, "Скачиваю ${mod.name}...", Toast.LENGTH_SHORT).show()
 
-        viewLifecycleOwner.lifecycleScope.launch {
+        lifecycleScope.launch {
             try {
                 val url = ModRepository.getDownloadUrl(mod)
                 val pluginsDir = File(context.filesDir, "plugins")
