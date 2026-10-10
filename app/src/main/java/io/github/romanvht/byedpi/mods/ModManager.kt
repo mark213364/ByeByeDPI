@@ -1,61 +1,60 @@
 package io.github.romanvht.byedpi.mods
 
-import android.os.Bundle
-import android.view.View
-import androidx.preference.PreferenceFragmentCompat
-import androidx.preference.SwitchPreferenceCompat
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import io.github.romanvht.byedpi.R
-import io.github.romanvht.byedpi.mods.ModManager
+import android.content.Context
+import android.content.SharedPreferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
-class ModsFragment : PreferenceFragmentCompat() {
+object ModManager {
+    private const val PREFS_NAME = "mods_state"
 
-    private var fab: FloatingActionButton? = null
+    private var prefs: SharedPreferences? = null
+    private val mods = mutableListOf<Mod>()
+    private val runningJobs = mutableMapOf<String, Job>()
+    private val scope = CoroutineScope(Dispatchers.IO)
+    private var initialized = false
 
-    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-        val context = requireContext()
-        ModManager.init(context)
+    fun init(context: Context) {
+        if (initialized) return
+        prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        registerBuiltinMods()
 
-        val screen = preferenceManager.createPreferenceScreen(context)
-
-        val seenIds = mutableSetOf<String>()
-        ModManager.getAllMods().forEach { mod ->
-            if (seenIds.add(mod.id)) {
-                val pref = SwitchPreferenceCompat(context).apply {
-                    key = mod.id
-                    title = mod.name
-                    summary = mod.description
-                    isChecked = ModManager.isEnabled(mod.id)
-                    setOnPreferenceChangeListener { _, newValue ->
-                        ModManager.setEnabled(context, mod, newValue as Boolean)
-                        true
-                    }
+        mods.forEach { mod ->
+            if (isEnabled(mod.id)) {
+                scope.launch {
+                    mod.onEnable(context.applicationContext)
+                    val job = launch { mod.run(context.applicationContext) }
+                    runningJobs[mod.id] = job
                 }
-                screen.addPreference(pref)
             }
         }
-
-        preferenceScreen = screen
+        initialized = true
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun registerBuiltinMods() {
+        mods.clear()
+        mods.add(AutoStrategyMod())
+    }
 
-        fab = requireActivity().findViewById(R.id.fab_add_mod)
-        fab?.apply {
-            visibility = View.VISIBLE
-            setOnClickListener {
-                parentFragmentManager.beginTransaction()
-                    .replace(R.id.settings, ModCatalogFragment())
-                    .addToBackStack(null)
-                    .commit()
+    fun getAllMods(): List<Mod> = mods
+
+    fun isEnabled(modId: String): Boolean = prefs?.getBoolean(modId, false) ?: false
+
+    fun setEnabled(context: Context, mod: Mod, enabled: Boolean) {
+        prefs?.edit()?.putBoolean(mod.id, enabled)?.apply()
+
+        if (enabled) {
+            scope.launch {
+                mod.onEnable(context.applicationContext)
+                val job = launch { mod.run(context.applicationContext) }
+                runningJobs[mod.id] = job
             }
+        } else {
+            runningJobs[mod.id]?.cancel()
+            runningJobs.remove(mod.id)
+            scope.launch { mod.onDisable(context.applicationContext) }
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        fab?.visibility = View.GONE
-        fab = null
     }
 }
