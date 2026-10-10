@@ -14,6 +14,9 @@
         <item name="colorOnSurface">#212121</item>
 
         <item name="materialCardViewStyle">@style/SmallShadowCard</item>
+
+        <!-- ВОТ ЭТА СТРОКА НУЖНА ДЛЯ PreferenceFragmentCompat -->
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <style name="AppToolbar" parent="Widget.MaterialComponents.Toolbar.Primary" />
