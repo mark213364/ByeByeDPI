@@ -7,6 +7,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
@@ -46,20 +47,72 @@ internal class NativeEngine(
         fun configuration(context: Context): Configuration {
             val preferences = context.getPreferences()
             val proxy = ByeDpiProxyPreferences.fromSharedPreferences(preferences, context)
-            val args = when (proxy) {
+            val baseArgs = when (proxy) {
                 is ByeDpiProxyCmdPreferences -> proxy.args
                 is ByeDpiProxyUIPreferences -> proxy.uiargs
             }
+
+            // Применяем оптимизации поверх аргументов
+            val args = applyPerformanceArgs(preferences, baseArgs.toList())
+
             val (defaultHost, defaultPort) = preferences.getProxyIpAndPort()
             val (host, port) = args.toList().checkIpAndPortInArgs()
+
             return Configuration(
-                args.toList(), host ?: defaultHost, (port ?: defaultPort).toInt(),
+                args.toList(),
+                host ?: defaultHost,
+                (port ?: defaultPort).toInt(),
                 dns = if (PrivateDnsUtils.getState(context) is PrivateDnsState.Configured) ""
                     else preferences.getStringNotNull("dns_ip", "1.1.1.1"),
                 ipv6 = preferences.getBoolean("ipv6_enable", false),
                 appListType = preferences.getStringNotNull("applist_type", "disable"),
                 apps = preferences.getSelectedApps(),
+
+                bufferSize = preferences.getInt("byedpi_buffer_size", 0),
+                maxConnections = preferences.getInt("byedpi_max_conn", 0),
+                tcpFastOpen = preferences.getBoolean("byedpi_tfo", false),
+                tunnelMtu = preferences.getInt("byedpi_tunnel_mtu", 0)
             )
+        }
+
+        /**
+         * Добавляет к аргументам ciadpi оптимизационные флаги.
+         * Все параметры берутся из SharedPreferences, чтобы пользователь мог
+         * включать/выключать оптимизации в UI.
+         */
+        private fun applyPerformanceArgs(
+            preferences: SharedPreferences,
+            baseArgs: List<String>
+        ): List<String> {
+            val result = baseArgs.toMutableList()
+
+            // -b <size> — размер буфера recv/send
+            val bufferSize = preferences.getInt("byedpi_buffer_size", 0)
+            if (bufferSize > 0 && result.none { it == "-b" }) {
+                result.add("-b")
+                result.add(bufferSize.toString())
+            }
+
+            // -c <count> — максимум соединений
+            val maxConn = preferences.getInt("byedpi_max_conn", 0)
+            if (maxConn > 0 && result.none { it == "-c" }) {
+                result.add("-c")
+                result.add(maxConn.toString())
+            }
+
+            // -F — TCP Fast Open
+            if (preferences.getBoolean("byedpi_tfo", false) && result.none { it == "-F" }) {
+                result.add("-F")
+            }
+
+            // -L <mode> — режим кэша авто-стратегий
+            val autoMode = preferences.getInt("byedpi_auto_mode", -1)
+            if (autoMode in 0..3 && result.none { it == "-L" }) {
+                result.add("-L")
+                result.add(autoMode.toString())
+            }
+
+            return result
         }
 
         private fun serviceClass(mode: Mode): Class<out Service> = when (mode) {
