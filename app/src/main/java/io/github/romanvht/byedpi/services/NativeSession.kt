@@ -208,9 +208,13 @@ internal class NativeSession(
                 createTunnel?.let { create ->
                     val fd = create(config)
                     tunFd = fd
+
+                    // MTU: если задан в настройках — используем его, иначе 8500
+                    val mtu = if (config.tunnelMtu > 0) config.tunnelMtu else 8500
+
                     val tunnelConfig = buildString {
                         appendLine("tunnel:")
-                        appendLine("  mtu: 8500")
+                        appendLine("  mtu: $mtu")
                         appendLine("misc:")
                         appendLine("  task-stack-size: 81920")
                         appendLine("socks5:")
