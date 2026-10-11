@@ -144,6 +144,50 @@
     </androidx.preference.PreferenceCategory>
 
     <androidx.preference.PreferenceCategory
+        android:title="Производительность">
+
+        <EditTextPreference
+            android:key="byedpi_buffer_size"
+            android:icon="@drawable/ic_speed"
+            android:title="Размер буфера"
+            android:summary="Размер буфера recv/send. 0 = по умолчанию (16384)"
+            android:defaultValue="0"
+            android:inputType="number" />
+
+        <EditTextPreference
+            android:key="byedpi_max_conn"
+            android:icon="@drawable/ic_network"
+            android:title="Макс. соединений"
+            android:summary="Максимум одновременных соединений. 0 = по умолчанию (512)"
+            android:defaultValue="0"
+            android:inputType="number" />
+
+        <EditTextPreference
+            android:key="byedpi_auto_mode"
+            android:icon="@drawable/ic_autorenew"
+            android:title="Режим кэша"
+            android:summary="-1 = выкл, 0-3 = режим кэша авто-стратегий"
+            android:defaultValue="-1"
+            android:inputType="number" />
+
+        <SwitchPreference
+            android:key="byedpi_tfo"
+            android:icon="@drawable/ic_power"
+            android:title="TCP Fast Open"
+            android:summary="Ускоряет установку соединения (требует поддержки сервером)"
+            android:defaultValue="false" />
+
+        <EditTextPreference
+            android:key="byedpi_tunnel_mtu"
+            android:icon="@drawable/ic_tune"
+            android:title="MTU туннеля"
+            android:summary="MTU для hev-socks5-tunnel. 0 = по умолчанию (8500)"
+            android:defaultValue="0"
+            android:inputType="number" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <androidx.preference.PreferenceCategory
         android:title="Моды">
 
         <Preference
